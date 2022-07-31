@@ -1,0 +1,97 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_rest_api/servicios/apiservice';
+import 'package:flutter_rest_api/modelos/contactos.dart';
+import 'dart:async';
+
+class MyHomePage extends StatefulWidget {
+    const MyHomePage({Key? key, required this.title}) : super(key: key);
+    final String title;
+    @override
+    State<MyHomePage> createState() => _MyHomePageState();
+}
+  
+class _MyHomePageState extends State<MyHomePage> {      
+    List<Contactos>? contactos;  
+    var isLoaded = false;  
+  
+    getData() async {
+      contactos = await ApiService.fetchContactos();      
+      if (contactos != null) {
+        setState(() {
+          isLoaded = true;
+        });
+      }else {
+      throw Exception('Fallo la carga de Contactos desde la API');
+    }
+    }
+  
+    @override
+    initState(){          
+      super.initState();            
+      getData();   
+    }  
+    
+  
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Lista de Contactos'),
+      ),
+      body: Visibility(
+        visible: isLoaded,
+        child: ListView.builder(
+          itemCount: contactos?.length,
+          itemBuilder: (context, index) {
+            return Container(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  Container(
+                    height: 50,
+                    width: 50,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(12),
+                      color: Colors.grey[300],
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          contactos![index].fullname,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          contactos![index].email,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),                        
+                        Text(
+                          contactos![index].phone,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+        replacement: const Center(
+          child: CircularProgressIndicator(),
+        ),
+      ),
+    );
+  }
+}
+
